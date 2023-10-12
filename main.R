@@ -7,24 +7,105 @@ if(!("gridExtra"%in%installed.packages()[,"Package"])){
 library(ggplot2)
 library(gridExtra)
 
+# Changes values from 0 and 1 to No and Yes
+titanic.train$Survived <- ifelse(titanic.train$Survived == 1, "Yes", "No")
+
+# Variables characteristics
+
+# Survived
+print(prop.table(table(titanic.train$Survived))*100)
+
+# Pclass
+summary(titanic.train$Pclass)
+prop.table(table(titanic.train$Pclass))*100
+# One bar to represent the three classes
+ggplot(titanic.train)+
+  aes(x = Pclass, fill=Pclass) +
+  labs(title="Number of people in each class", x="Class", y="People")+
+  geom_bar(color="#ffffff", alpha=0.6, position="dodge")+ 
+  scale_fill_manual(values=c("gold", "gold3", "gold4"))+
+  theme(legend.position = "none")
+
+
+# Sex
+print(table(titanic.train$Sex))
+print(prop.table(table(titanic.train$Sex))*100)
+
+# Age
+summary(titanic.train$Age)
+# Histogram of age
+ggplot(titanic.train)+
+  aes(x = Age) +
+  labs(title="Age distribution", x="Age", y="People")+
+  geom_histogram(binwidth=2, color="#ffffff")+
+  scale_fill_manual(values=c("#818589", "green"))
+
+# SibSp
+summary(titanic.train$SibSp)
+# Histogram of SibSp
+ggplot(titanic.train)+
+  aes(x = SibSp) +
+  labs(title="Number of siblings and spouses", x="Siblings and spouses", y="People")+
+  geom_bar(color="#ffffff", fill="blue4")
+
+# Parch
+summary(titanic.train$Parch)
+# Histogram of Parch
+ggplot(titanic.train)+
+  aes(x = Parch, fill=Survived) +
+  labs(title="Number of parents and children", x="Parents and children", y="People")+
+  geom_bar(color="#ffffff", fill="pink4")
+
+# Ticket
+print(table(titanic.train$Ticket))
+
+# Fare
+summary(titanic.train$Fare)
+# Histogram of Fare
+ggplot(titanic.train)+
+  aes(x = Fare) +
+  labs(title="Fare distribution", x="Fare", y="People")+
+  geom_histogram(binwidth=3, color="#ffffff", fill="gold3")+
+  scale_fill_manual(values=c("#818589", "green"))
+
+# Cabin
+print(table(titanic.train$Cabin))
+passangersWithCabin <- titanic.train[!(titanic.train$Cabin == ""), ]
+
+ggplot(passangersWithCabin)+
+  aes(x = Cabin)+
+  labs(title="Cabin location distribution", x="Cabin location", y="Count")+
+  geom_bar()
+
+# Embarked
+print(table(titanic.train$Embarked))
+
+
+
 # 1 Survival rate of men vs women
 # How many men and women traveled
 print(table(titanic.train$Sex))
 print(prop.table(table(titanic.train$Sex))*100)
 
+males <- titanic.train[titanic.train$Sex=="male", ]
+print(prop.table(table(males$Sex, males$Survived))*100)
+
+females <- titanic.train[titanic.train$Sex=="female", ]
+print(prop.table(table(females$Sex, females$Survived))*100)
+
+
 # Two histograms of men survived and women survived on top of each other using transparent colors
-ggplot(titanic.train[titanic.train$Survived == "Yes", ]) +
-  aes(x = Age, fill=Sex) +
-  labs(x="Age", y="Survived")+
-  geom_histogram(binwidth=1,color="#ffffff", alpha=0.6, position = 'identity' )+
+ggplot(titanic.train[titanic.train$Survived == "Yes", ])+
+  aes(x = Age, fill=Sex)+
+  labs(title="Survival of men vs women and their age", x="Age", y="Survived")+
+  geom_histogram(binwidth=1, color="#ffffff", alpha=0.6, position = 'identity')+
   scale_fill_manual(values=c("#ff304f", "#28c7fa"))
 
 # Two graphs of men and women survival in percentages
-titanic.train$Survived <- ifelse(titanic.train$Survived == 1, "Yes", "No")
 ggplot(titanic.train)+
   aes(x = Age, fill=Survived) +
   labs(title="Survival rate of men vs women", x="Age", y="Survived")+
-  geom_histogram(binwidth=4, color="white", position="fill")+
+  geom_histogram(binwidth=5, color="white", position="fill")+
   scale_fill_manual(values=c("grey40", "green"))+
   facet_wrap(~Sex)
 
@@ -32,7 +113,7 @@ ggplot(titanic.train)+
 ggplot(titanic.train[titanic.train$Sex =="female", ]) +
   aes(x = Age, fill=Survived) +
   labs(title = "Survival rate based on age", x="Age", y="People %")+
-  geom_histogram(binwidth=2, color="#ffffff", position="fill")+
+  geom_histogram(binwidth=4, color="#ffffff", position="fill")+
   scale_fill_manual(values=c("grey40", "springgreen"))
 
 # 2 Survival x Fare price
@@ -67,6 +148,12 @@ p2 <- ggplot(titanic.train)+
   scale_fill_manual(values=c("#818589", "gold"))
 #Combines the two graphs
 p <- grid.arrange(p2, p1, ncol = 1)
+
+# Three scatter plots showing all calsess and age x fare and wheter they survived
+ggplot(titanic.train, aes(x=Fare, y=Age, color=Survived))+
+  geom_point(size=2)+
+  scale_color_manual(values=c("black", "gold"))+
+  scale_x_log10()+ facet_wrap(.~Pclass)
 
 # Age x Fare x Class
 #ggplot(titanic.train, aes(x=Fare, y=Age, color=Pclass))+ 
@@ -120,6 +207,16 @@ ggplot(passangersWithCabin)+
   scale_fill_manual(values=c("#818589", "purple"))+
   coord_flip()+
   scale_x_discrete(limits=rev)
+
+# Barchart comparing the survival of poeple with and wihtout a cabin number
+# Categorize passengers with and without cabins
+titanic.train$CabinStatus <- ifelse(titanic.train$Cabin=="", "No Cabin", "With Cabin")
+ggplot(titanic.train)+
+  aes(x = CabinStatus, fill=Survived) +
+  labs(title="Survival of people with and without cabin in %", y="Survived %")+
+  geom_bar(color="#ffffff", alpha=0.6, position="fill")+
+  scale_fill_manual(values=c("#818589", "brown4"))
+
 
 # 6 Survival x Number of relatives on board
 # Siblings and spouses
