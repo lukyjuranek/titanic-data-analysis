@@ -36,9 +36,9 @@ summary(titanic.train$Age)
 # Histogram of age
 ggplot(titanic.train)+
   aes(x = Age) +
-  labs(title="Age distribution", x="Age", y="People")+
-  geom_histogram(binwidth=2, color="#ffffff")+
-  scale_fill_manual(values=c("#818589", "green"))
+  labs(title="Age distribution")+
+  geom_boxplot()+
+  scale_fill_manual(values=c("#818589"))
 
 # SibSp
 summary(titanic.train$SibSp)
@@ -66,11 +66,13 @@ ggplot(titanic.train)+
   aes(x = Fare) +
   labs(title="Fare distribution", x="Fare", y="People")+
   geom_histogram(binwidth=3, color="#ffffff", fill="gold3")+
-  scale_fill_manual(values=c("#818589", "green"))
+  scale_y_log10()
 
 # Cabin
 print(table(titanic.train$Cabin))
 passangersWithCabin <- titanic.train[!(titanic.train$Cabin == ""), ]
+passangersWithCabin$Cabin = substr(passangersWithCabin$Cabin,1,1)
+print(table(passangersWithCabin$Cabin))
 
 ggplot(passangersWithCabin)+
   aes(x = Cabin)+
@@ -106,7 +108,7 @@ ggplot(titanic.train)+
   aes(x = Age, fill=Survived) +
   labs(title="Survival rate of men vs women", x="Age", y="Survived")+
   geom_histogram(binwidth=5, color="white", position="fill")+
-  scale_fill_manual(values=c("grey40", "green"))+
+  scale_fill_manual(values=c("grey40", "springgreen"))+
   facet_wrap(~Sex)
 
 # Histogram Survived x Age
@@ -235,6 +237,15 @@ p4 <- ggplot(titanic.train)+
 
 #Combines the two graphs
 p <- grid.arrange(p3, p4, ncol = 1)
+
+# All relativees together
+relatives = titanic.train$SibSp + titanic.train$Parch
+ggplot(titanic.train) + aes(x = relatives, fill = Survived ) +
+  labs(x="Number of Relatives", y="Percentage")+
+  geom_bar()+
+  scale_x_discrete()+
+  scale_fill_manual(values=c("#818589", "darkorange"))
+
 
 
 
