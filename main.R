@@ -10,6 +10,25 @@ library(gridExtra)
 # Changes values from 0 and 1 to No and Yes
 titanic.train$Survived <- ifelse(titanic.train$Survived == 1, "Yes", "No")
 
+
+# Correlations
+
+# Correlation coef of embarked and survived
+embarked_num = as.numeric(titanic.train$Embarked)
+survival_num = as.numeric(titanic.train$Survived)
+print(cor(embarked_num,survival_num))
+
+# Correlation coef of sex and survived
+sex_num = as.numeric(titanic.train$Sex)
+print(cor(sex_num,survival_num))
+
+# Correlation coef of pclass and survived
+pclass_num = as.numeric(titanic.train$Pclass)
+print(cor(pclass_num,survival_num))
+
+
+
+
 # Variables characteristics
 
 # Survived
@@ -25,7 +44,6 @@ ggplot(titanic.train)+
   geom_bar(color="#ffffff", alpha=0.6, position="dodge")+ 
   scale_fill_manual(values=c("gold", "gold3", "gold4"))+
   theme(legend.position = "none")
-
 
 # Sex
 print(table(titanic.train$Sex))
@@ -84,7 +102,7 @@ print(table(titanic.train$Embarked))
 
 
 
-# 1 Survival rate of men vs women
+# 1 Survival rate of men vs women vs age
 # How many men and women traveled
 print(table(titanic.train$Sex))
 print(prop.table(table(titanic.train$Sex))*100)
@@ -95,6 +113,10 @@ print(prop.table(table(males$Sex, males$Survived))*100)
 females <- titanic.train[titanic.train$Sex=="female", ]
 print(prop.table(table(females$Sex, females$Survived))*100)
 
+
+# Correlation coef of sex and survived
+sex_num = as.numeric(titanic.train$Sex)
+print(cor(sex_num,survival_num))
 
 # Two histograms of men survived and women survived on top of each other using transparent colors
 ggplot(titanic.train[titanic.train$Survived == "Yes", ])+
@@ -131,8 +153,13 @@ ggplot(titanic.train) +
   labs(title="Survival rate based on the fare price")+
   geom_boxplot()+
   scale_y_log10()+
-  scale_fill_manual(values=c("#818589", "green"))+
+  scale_fill_manual(values=c("#818589", "springgreen"))+
   theme(legend.position = "none")
+
+ggplot(titanic.train, aes(x=Sex, y=Fare, fill = Survived)) +
+  geom_bar(stat = "identity")+
+  scale_fill_manual(values=c("#818589", "springgreen"))+
+  facet_wrap(.~Embarked)
 
 
 # 3 Survival x class in %
@@ -186,7 +213,7 @@ pie_data <- data.frame(
 # Create a pie chart
 ggplot(pie_data, aes(x = Count, y = "", fill = Embarked))+
   geom_bar(stat = "identity", width = 1)+
-  coord_polar(theta="x", start=0)+
+  #coord_polar(theta="x", start=0)+
   labs(title = "Embarkation(Port)", fill = "Port", x="", y="")+
   scale_fill_manual(values=c("gold", "brown", "royalblue"), labels=c("Cherbourg", "Queenstown", "Southampton"))+
   geom_text(
@@ -194,6 +221,15 @@ ggplot(pie_data, aes(x = Count, y = "", fill = Embarked))+
     color = "black",
     position = position_stack(vjust = 0.5))+
   theme_void()
+
+# Plclass x embarked
+ggplot(titanic.train)+
+  aes(x = Embarked, fill=Pclass) +
+  labs(title="Passanger class and embarkation", x="Embarked", y="Count %")+
+  geom_bar(position="fill")+
+  scale_x_discrete(labels=c("Cherbourg", "Queenstown", "Southampton"))+
+  scale_fill_manual(values=c("gold", "royalblue", "grey25"))
+
 
 # 5 Cabin location(cabin letter) x Survived
 # Takes the cabin number and only keeps the letter andonly people with a cabin
