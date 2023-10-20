@@ -251,9 +251,10 @@ ggplot(passangersWithCabin)+
 titanic.train$CabinStatus <- ifelse(titanic.train$Cabin=="", "No Cabin", "With Cabin")
 ggplot(titanic.train)+
   aes(x = CabinStatus, fill=Survived) +
-  labs(title="Survival of people with and without cabin in %", y="Survived %")+
+  labs(title="Survival of people with and without cabin in %", y="Survived %", x="")+
   geom_bar(color="#ffffff", alpha=0.6, position="fill")+
-  scale_fill_manual(values=c("#818589", "brown4"))
+  scale_fill_manual(values=c("#818589", "brown4"))+
+  coord_flip()
 
 
 # 6 Survival x Number of relatives on board
