@@ -283,6 +283,9 @@ ggplot(titanic.train) + aes(x = relatives, fill = Survived ) +
   scale_x_discrete()+
   scale_fill_manual(values=c("#818589", "darkorange"))
 
+relatives_num = as.numeric(relatives)
+survival_num = as.numeric(titanic.train$Survived)
+print(cor(relatives_num,survival_num))
 
 
 
