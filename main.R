@@ -115,7 +115,23 @@ print(prop.table(table(females$Sex, females$Survived))*100)
 
 
 # Correlation coef of sex and survived
+age_num = as.numeric(titanic.train$Age)
+survival_num = as.numeric(titanic.train$Survived)
+print(cor(age_num,survival_num))
+
+# Correlation coef of age and survived of only males
+age_num = as.numeric(males$Age)
+survival_num = as.numeric(males$Survived)
+print(cor(age_num,survival_num))
+
+# Correlation coef of age and survived of only females
+age_num = as.numeric(females$Age)
+survival_num = as.numeric(females$Survived)
+print(cor(age_num,survival_num))
+
+# Correlation coef of sex and survived
 sex_num = as.numeric(titanic.train$Sex)
+survival_num = as.numeric(titanic.train$Survived)
 print(cor(sex_num,survival_num))
 
 # Two histograms of men survived and women survived on top of each other using transparent colors
@@ -128,7 +144,7 @@ ggplot(titanic.train[titanic.train$Survived == "Yes", ])+
 # Two graphs of men and women survival in percentages
 ggplot(titanic.train)+
   aes(x = Age, fill=Survived) +
-  labs(title="Survival rate of men vs women", x="Age", y="Survived")+
+  labs(title="Survival rate of men vs women", x="Age", y="Count %")+
   geom_histogram(binwidth=5, color="white", position="fill")+
   scale_fill_manual(values=c("grey40", "springgreen"))+
   facet_wrap(~Sex)
@@ -162,6 +178,12 @@ ggplot(titanic.train, aes(x=Sex, y=Fare, fill = Survived)) +
   facet_wrap(.~Embarked)
 
 
+# Correlation coef of fare and survival
+fare_num = as.numeric(titanic.train$Fare)
+survival_num = as.numeric(titanic.train$Survived)
+print(cor(fare_num,survival_num))
+
+
 # 3 Survival x class in %
 p1 <- ggplot(titanic.train)+
   aes(x = Pclass, fill=Survived) +
@@ -184,6 +206,12 @@ ggplot(titanic.train, aes(x=Fare, y=Age, color=Survived))+
   scale_color_manual(values=c("black", "gold"))+
   scale_x_log10()+ facet_wrap(.~Pclass)
 
+
+# Correlation coef of ticket class and survival
+pclass_num = as.numeric(titanic.train$Pclass)
+survival_num = as.numeric(titanic.train$Survived)
+print(cor(pclass_num,survival_num))
+
 # Age x Fare x Class
 #ggplot(titanic.train, aes(x=Fare, y=Age, color=Pclass))+ 
 #  geom_point(size=2)+
@@ -193,7 +221,7 @@ ggplot(titanic.train, aes(x=Fare, y=Age, color=Survived))+
 # 4 Embarkation x Survival
 ggplot(titanic.train)+
   aes(x = Embarked, fill=Survived) +
-  labs(title="Survival based on the place of embarkation", x="Embarked", y="Survived")+
+  labs(title="Survival based on the place of embarkation", x="Embarked", y="Count %")+
   geom_bar(alpha=0.6, position="fill")+
   scale_x_discrete(labels=c("Cherbourg", "Queenstown", "Southampton"))+
   scale_fill_manual(values=c("#818589", "blue"))
@@ -203,6 +231,11 @@ ggplot(titanic.train)+
 summary_data <- prop.table(table(titanic.train$Embarked))*100
 summary_data <- summary_data[2:4]
 print(summary_data)
+
+# Correlation coef of embarkation and survival
+embarked_num = as.numeric(as.factor(titanic.train$Embarked))
+survival_num = as.numeric(titanic.train$Survived)
+print(cor(embarked_num,survival_num))
 
 # Create a data frame for the pie chart
 pie_data <- data.frame(
@@ -256,6 +289,12 @@ ggplot(titanic.train)+
   scale_fill_manual(values=c("#818589", "brown4"))+
   coord_flip()
 
+# Correlation coef of cabin letter and survival
+passangersWithCabin_num = as.numeric(as.factor(passangersWithCabin$Cabin))
+survival_num = as.numeric(passangersWithCabin$Survived)
+print(cor(passangersWithCabin_num,survival_num))
+
+
 
 # 6 Survival x Number of relatives on board
 # Siblings and spouses
@@ -275,10 +314,10 @@ p4 <- ggplot(titanic.train)+
 #Combines the two graphs
 p <- grid.arrange(p3, p4, ncol = 1)
 
-# All relativees together
+# All relatives together
 relatives = titanic.train$SibSp + titanic.train$Parch
 ggplot(titanic.train) + aes(x = relatives, fill = Survived ) +
-  labs(x="Number of Relatives", y="Percentage")+
+  labs(x="Number of Relatives", y="Count")+
   geom_bar()+
   scale_x_discrete()+
   scale_fill_manual(values=c("#818589", "darkorange"))
