@@ -62,8 +62,8 @@ train_decision_tree <- function(training_set, show_tree=TRUE){
 #   trained_model: The trained model to be used for prediction.
 # Returns:
 #   pred: The predicted values for the test set.
-my_model <- function(data, trained_model){
-  pred = predict(trained_model, test_set, type="class")
+my_model <- function(data_to_predict, trained_model){
+  pred = predict(trained_model, data_to_predict, type="class")
   return(pred)
 }
 
@@ -89,4 +89,45 @@ evaluate_model <- function(test_set, prediction) {
   model_quality$specificity = conf_matrix[2,2]/sum(conf_matrix[,2])
   
   return(list(model_quality = model_quality))
+}
+
+# Performs k-fold cross validation on a given dataset
+# Args:
+#   data: the dataset to perform cross validation on
+#   nfolds: the number of folds to use in the cross validation (default is 10)
+# Returns:
+#   Doesn't return anything, but plots a histogram and boxplot of the model quality results
+kfold_cross_validate <- function(data, nfolds=10){
+  library(caret)
+  set.seed(123)
+  folds = createFolds(data$Survived, k = nfolds)
+  
+  cv = lapply(folds, function(x) {
+    kfold_training_set = data[-x,]
+    kfold_test_set = data[x,]
+    
+    kfold_tree = train_decision_tree(kfold_training_set, show_tree=FALSE)
+    
+    kfold_pred = my_model(kfold_test_set, kfold_tree)
+    
+    model_quality = evaluate_model(kfold_test_set, kfold_pred)$model_quality
+    return(model_quality)
+  })
+
+  # Create a data frame to store the results of the cross validation
+  plotmodelqualityresults=data.frame(values=unlist(cv),
+                                   parameter=as.factor(c(rep(c("accuracy",
+                                                               "sensitivity",
+                                                               "specificity"),nfolds))))
+
+  # Plot a histogram of the model quality results
+  library(ggplot2)
+  ggplot(data=plotmodelqualityresults)+aes(x=values,fill=parameter)+
+    geom_histogram(bins=10, colour="black",aes(y=..density..))+
+    geom_density( colour="black",alpha=0,size=1)+facet_grid(.~parameter)
+
+  # Plot a boxplot of the model quality results
+  ggplot(data=plotmodelqualityresults)+aes(x=parameter,fill=parameter,y=values)+
+    geom_boxplot()
+
 }

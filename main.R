@@ -21,3 +21,5 @@ prediction <- my_model(test_set, mytree)
 ## Evaluates the model
 results <- evaluate_model(test_set, prediction)
 print(results$model_quality)
+
+kfold_cross_validate(data, nfolds=10)
