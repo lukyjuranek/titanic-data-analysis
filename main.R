@@ -1,7 +1,7 @@
 # Load the my_model object from ML-model.R
-source("ML-model.R")
-load("./titanic_train.RDATA")
 setwd("C:/dev/UC3M/titanic-data-analysis")
+load("./titanic_train.RDATA")
+source("ML-model.R")
 
 ## Cleans up data
 data <- cleanup_data(titanic.train)
@@ -20,6 +20,8 @@ prediction <- my_model(test_set, mytree)
 # Use the same test_set in the previous prediction as in the testing in the following section
 ## Evaluates the model
 results <- evaluate_model(test_set, prediction)
-print(results$model_quality)
+# print(results$model_quality)
 
-kfold_cross_validate(data, nfolds=10)
+# kfold_cross_validate(data, nfolds=10)
+
+hyper_param_selection_with_kfold(data)
