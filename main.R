@@ -20,7 +20,7 @@ training_set = divided_data[[1]]
 test_set = divided_data[[2]]
 
 ## Train tree
-decision_tree <- train_decision_tree(training_set, show_tree=TRUE)
+# decision_tree <- train_decision_tree(training_set, show_tree=TRUE)
 random_forest <- train_random_forest(training_set)
 
 ## Uses the model to predict new data
@@ -31,7 +31,8 @@ prediction <- my_model(test_set, random_forest)
 results <- evaluate_model(test_set, prediction)
 # print(results$model_quality)
 
-kfold_cross_validate(data, model="decisionTree", nfolds=10, print_results=TRUE)
+# kfold_cross_validate(data, model="decisionTree", nfolds=10, print_results=TRUE)
 kfold_cross_validate(data, model="randomForest", nfolds=10, print_results=TRUE)
 
-decision_tree_hyper_param_selection_with_kfold(data)
+# decision_tree_hyper_param_selection_with_kfold(data)
+# random_forest_hyper_param_selection_with_kfold(data)

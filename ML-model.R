@@ -31,6 +31,7 @@ cleanup_data <- function(data){
   # Takes the first letter from the cabin value and converts it to a number
   data$CabinNumber <- ifelse(!(data$Cabin == ""), match(substr(data$Cabin, 1, 1), LETTERS), 0)
   # Changes the values of Survived from 0 and 1 to Died and survived
+  # Disbaled this beacuse it causes problems with the random forest model
   # data$Survived <- ifelse(data$Survived == 1, "Survived", "Died")
   data <- data[ , c("Survived", "Pclass","Sex", "Age", "Fare", "Relatives", "CabinNumber")]
   
@@ -85,13 +86,7 @@ train_decision_tree <- function(training_set, show_tree=TRUE){
 }
 
 train_random_forest <- function(training_set){
-  # library(randomForest)
-  # print(sum(is.na(training_set)))
-  # Print the rows with empty values
-  # print(training_set[!complete.cases(training_set),])
-  # print(training_set)
-  classifier = randomForest(Survived ~ ., data=training_set, ntree=100, mtry=2)
-  # print(class(y))
+  classifier = randomForest(Survived ~ ., data=training_set, ntree=25, mtry=2)
   return(classifier)
 }
 
@@ -191,7 +186,7 @@ decision_tree_hyper_param_selection_with_kfold <- function(data){
   d_maxdepth=seq(from=1,to=7,by=1)
   d_cp=10^(-seq(from=2,to=4,by=1))
   parameters=expand.grid(minsplit=d_minsplit,maxdepth=d_maxdepth,cp=d_cp)
-  cat("Trying ", nrow(parameters), " combinations of parameters")
+  cat("Trying ", nrow(parameters), " combinations of parameters for the decision tree model\n")
 
   # Applying k-Fold Cross Validation
   nfolds = 10
@@ -261,7 +256,82 @@ decision_tree_hyper_param_selection_with_kfold <- function(data){
   print("The best hyperparameter combination for maximum mean for all three parameters:")
   print(parameters[which.max(apply(cv_hyper,MARGIN = 2,FUN=mean)),])
   print(cv_hyper[,which.max(apply(cv_hyper,MARGIN = 2,FUN=mean))])
-  
-  #View(plotmodelqualityresults)
+
+
+}
+
+random_forest_hyper_param_selection_with_kfold <- function(data){
+  d_mtry=seq(from=1,to=7,by=1)
+  d_ntree=seq(from=1,to=100,by=1)
+  parameters=expand.grid(mtry=d_mtry,ntree=d_ntree)
+  cat("Trying ", nrow(parameters), " combinations of parameters for random forest\n")
+
+  # Applying k-Fold Cross Validation
+  nfolds = 10
+  folds = createFolds(data$Survived, k = nfolds)
+
+  # Iterative process using apply
+  cv_hyper = apply(parameters,1,function(y){
+    cat(".")
+    cv = lapply(folds, function(x) {
+      # Select training and test set according to current split
+      training_set = data[-x,]
+      test_set = data[x,]
+      forest = randomForest(Survived ~ ., data=training_set, ntree=y[2], mtry=y[1])
+      # Use the function predict to apply the classification algorithm
+      # with test set
+      pred = predict(forest,test_set,type="class")
+      # Compute the confusion matrix
+      conf_matrix = table(test_set$Survived,pred,dnn=c("Actual value","Classifier prediction"))
+      conf_matrix_prop = prop.table(conf_matrix)
+      
+      # Compute error estimates
+      accuracy = sum(diag(conf_matrix))/sum(conf_matrix)
+      sensitivity = conf_matrix[1,1]/sum(conf_matrix[,1])
+      specificity = conf_matrix[2,2]/sum(conf_matrix[,2])
+      return(c(accuracy,sensitivity,specificity))
+    })
+    
+    modqualres = data.frame(t(matrix(unlist(cv),nrow = 3)))
+    names(modqualres)=c("accuracy","sensitivity","specificity")
+    
+    return(c(mean(modqualres$accuracy),mean(modqualres$sensitivity),mean(modqualres$specificity)))
+    
+  })
+
+  plotmodelqualityresults=data.frame(values=c(cv_hyper[1,],
+                                              cv_hyper[2,],
+                                              cv_hyper[3,]),
+                                    parameter=as.factor(c(rep("accuracy",dim(cv_hyper)[2]),
+                                                          rep("sensitivity",dim(cv_hyper)[2]),
+                                                          rep("specificity",dim(cv_hyper)[2]))))
+
+
+
+  # Plots the results
+  # library(ggplot2)
+  ggplot(data=plotmodelqualityresults)+aes(x=values,fill=parameter)+
+    geom_histogram(bins=10, colour="black",aes(y=..density..))+
+    geom_density( colour="black",alpha=0,linewidth=1)+facet_grid(.~parameter)
+
+  ggplot(data=plotmodelqualityresults)+aes(x=parameter,fill=parameter,y=values)+
+    geom_boxplot()
+
+  # The best hyperparameter combination for maximum mean accuracy corresponds to
+  print("\nThe best hyperparameter combination for maximum mean accuracy:")
+  print(parameters[which.max(cv_hyper[1,]),])
+  print(cv_hyper[,which.max(cv_hyper[1,])])
+  # The best hyperparameter combination for maximum mean sensitivity corresponds to
+  print("The best hyperparameter combination for maximum mean sensitivity:")
+  print(parameters[which.max(cv_hyper[2,]),])
+  print(cv_hyper[,which.max(cv_hyper[2,])])
+  # The best hyperparameter combination for maximum mean specificity corresponds to
+  print("The best hyperparameter combination for maximum mean specificity:")
+  print(parameters[which.max(cv_hyper[3,]),])
+  print(cv_hyper[,which.max(cv_hyper[3,])])
+  # The best hyperparameter combination for maximum mean for the three parameters corresponds to
+  print("The best hyperparameter combination for maximum mean for all three parameters:")
+  print(parameters[which.max(apply(cv_hyper,MARGIN = 2,FUN=mean)),])
+  print(cv_hyper[,which.max(apply(cv_hyper,MARGIN = 2,FUN=mean))])
 
 }
