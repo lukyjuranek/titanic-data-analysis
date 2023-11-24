@@ -17,6 +17,9 @@ check_and_install_packages <- function(){
   if(!require("ggplot2")){
     install.packages('ggplot2')
   }
+  if (!require("factoextra")){
+    install.packages( "factoextra")
+  }
 }
 
 # Cleans up the given data by selecting specific columns, combining Parch and SibsSP, etc.
@@ -90,6 +93,21 @@ train_random_forest <- function(training_set){
   return(classifier)
 }
 
+# Trains a k-nearest neighbors (knn) model using the provided training set.
+# uses the caret package
+# Parameters:
+#   - training_set: The dataset used for training the model.
+# Returns:
+#   The trained knn model.
+train_knn <- function(training_set){
+  knn_model <- train(Survived ~ ., data = training_set, method = "knn", trControl = trainControl(method = "cv", number = 10), preProcess = c("center", "scale"))
+}
+
+knn_predict <- function(test_set, knn_model){
+  prediction <- predict(knn_model, test_set)
+
+  return(prediction)
+}
 
 # This function takes in a dataset and a trained model, and returns the predicted values for the test set.
 # Parameters:
@@ -102,7 +120,6 @@ my_model <- function(data_to_predict, trained_model){
   return(pred)
 }
 
-
 # Evaluates the quality of a machine learning model by computing the confusion matrix and error estimates.
 # Args:
 #   test_set: A data frame containing the test set.
@@ -110,7 +127,7 @@ my_model <- function(data_to_predict, trained_model){
 # 
 # Returns:
 #   A list containing the model quality metrics (accuracy, precision, and specificity).
-evaluate_model <- function(test_set, prediction) {
+evaluate_model <- function(test_set, prediction, print_results=FALSE) {
   # Computes the confusion matrix
   conf_matrix = table(test_set$Survived, prediction, dnn=c("Actual value","Classifier prediction"))
   #print(conf_matrix)
@@ -123,7 +140,13 @@ evaluate_model <- function(test_set, prediction) {
   model_quality$precision = conf_matrix[1,1]/sum(conf_matrix[,1])
   model_quality$specificity = conf_matrix[2,2]/sum(conf_matrix[,2])
   
-  return(list(model_quality = model_quality))
+  results <- list(model_quality = model_quality)
+  
+  if(print_results == TRUE){
+    print(results$model_quality)
+  }
+
+  return(results)
 }
 
 # Performs k-fold cross validation on a given dataset
