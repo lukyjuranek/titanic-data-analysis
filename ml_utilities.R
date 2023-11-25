@@ -109,17 +109,6 @@ knn_predict <- function(test_set, knn_model){
   return(prediction)
 }
 
-# This function takes in a dataset and a trained model, and returns the predicted values for the test set.
-# Parameters:
-#   data: The dataset to be used for prediction.
-#   trained_model: The trained model to be used for prediction.
-# Returns:
-#   pred: The predicted values for the test set.
-my_model <- function(data_to_predict, trained_model){
-  pred = predict(trained_model, data_to_predict, type="class")
-  return(pred)
-}
-
 # Evaluates the quality of a machine learning model by computing the confusion matrix and error estimates.
 # Args:
 #   test_set: A data frame containing the test set.
@@ -165,10 +154,10 @@ kfold_cross_validate <- function(data, model="tree", nfolds=10, print_results=FA
     
     if(model == "decisionTree"){
       kfold_tree = train_decision_tree(kfold_training_set, show_tree=FALSE)
-      kfold_pred = my_model(kfold_test_set, kfold_tree)
+      kfold_pred = predict(kfold_tree, kfold_test_set, type="class")
     } else if(model == "randomForest"){
       kfold_random_forest = train_random_forest(kfold_training_set)
-      kfold_pred = my_model(kfold_test_set, kfold_random_forest)
+      kfold_pred = predict(kfold_random_forest, kfold_test_set, type="class")
     } else {
       stop("Invalid model argument. Valid arguments are 'decisionTree' and 'randomForest'.")
     }
