@@ -6,7 +6,7 @@ my_model = function(test_set) {
   # Takes the first letter from the cabin value and converts it to a number
   test_set$CabinNumber <- ifelse(!(test_set$Cabin == ""), match(substr(test_set$Cabin, 1, 1), LETTERS), 0)
   # Changes the values of Survived from 0 and 1 to Died and survived
-  # Disbaled this beacuse it causes problems with the random forest model
+  # Disabled this beacuse it causes problems with the random forest model
   # data$Survived <- ifelse(data$Survived == 1, "Survived", "Died")
   test_set <- test_set[ , c("Survived", "Pclass","Sex", "Age", "Fare", "Relatives", "CabinNumber")]
   
