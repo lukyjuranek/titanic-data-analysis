@@ -144,7 +144,7 @@ evaluate_model <- function(test_set, prediction, print_results=FALSE) {
 #   nfolds: the number of folds to use in the cross validation (default is 10)
 # Returns:
 #   Doesn't return anything, but plots a histogram and boxplot of the model quality results
-kfold_cross_validate <- function(data, model="tree", nfolds=10, print_results=FALSE){
+kfold_cross_validate <- function(data, model="decisionTree", nfolds=10, print_results=FALSE){
   set.seed(123)
   folds = createFolds(data$Survived, k = nfolds)
   
